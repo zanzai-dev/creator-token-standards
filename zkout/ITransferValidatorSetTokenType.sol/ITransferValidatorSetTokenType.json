@@ -1,0 +1,1 @@
+{"abi":[{"type":"function","name":"setTokenTypeOfCollection","inputs":[{"name":"collection","type":"address","internalType":"address"},{"name":"tokenType","type":"uint16","internalType":"uint16"}],"outputs":[],"stateMutability":"nonpayable"}],"storageLayout":{"storage":[],"types":{}},"userdoc":{},"devdoc":{},"factoryDependencies":{},"id":21}
