@@ -68,23 +68,46 @@ import "./programmable-royalties/BasicRoyalties.sol";
  * @notice Extension of ERC721C that adds basic royalties support.
  * @dev Pixl is going to 16$60.
  */
-contract PaperSappy is OwnableBasic, ERC721C, BasicRoyalties, AirdropMint, IContractMetadata {
-
-    uint256 internal _nextTokenId = 1;
+contract PaperSappy is
+    OwnableBasic,
+    ERC721C,
+    BasicRoyalties,
+    AirdropMint,
+    IContractMetadata
+{
+    // The number of tokens burned.
+    uint256 private _burnCounter;
 
     // Base URI
     string internal _metadataURI = "";
 
     /// @notice Returns the contract metadata URI.
-    string public override contractURI;
+    string internal _contractURI;
+
+    struct AirdropRequest {
+        address recipient;
+        uint256 amount;
+    }
 
     constructor()
-        ERC721OpenZeppelin("ZZTest3", "ZT3")
-        BasicRoyalties(0x1e90E7404c8cA3333D86bC81D586449a99a5791A, 100)
-        AirdropMint(5)
-        MaxSupply(10, 10)
+        ERC721OpenZeppelin("Paper Sappys", "SAPPYS")
+        BasicRoyalties(0x16011D9ee0CdB1073D020F19636747dd86B27A6c, 1000)
+        AirdropMint(5000)
+        MaxSupply(5000, 5000)
     {
         setTransferValidator(0x3203c3f64312AF9344e42EF8Aa45B97C9DFE4594);
+    }
+
+    function arf(uint8 _arfing) external pure returns (string memory) {
+        if (_arfing > 10) {
+            return "Big Arf Energy!!!!";
+        }
+        string memory arfs = "";
+        for (uint256 i = 0; i < _arfing; ++i) {
+            arfs = string.concat(arfs, "Arf! ");
+        }
+
+        return arfs;
     }
 
     function supportsInterface(
@@ -95,26 +118,8 @@ contract PaperSappy is OwnableBasic, ERC721C, BasicRoyalties, AirdropMint, ICont
             ERC2981.supportsInterface(interfaceId);
     }
 
-    function burn(uint256 tokenId) external {
-        _burn(tokenId);
-    }
-
-    /**
-     * @dev Base URI for computing {tokenURI}. If set, the resulting URI for each
-     * token will be the concatenation of the `baseURI` and the `tokenId`. Empty
-     * by default, can be overridden in child contracts.
-     */
-    function _baseURI() internal view virtual override returns (string memory) {
-        return _metadataURI;
-    }
-
-    function setBaseURI(string memory _baseUri) external {
-        _requireCallerIsContractOwner();
-        _setBaseURI(_baseUri);
-    }
-
-    function _setBaseURI(string memory _baseUri) internal virtual {
-        _metadataURI = _baseUri;
+    function contractURI() external view override returns (string memory) {
+        return _contractURI;
     }
 
     function setContractURI(string memory _uri) external override {
@@ -122,12 +127,9 @@ contract PaperSappy is OwnableBasic, ERC721C, BasicRoyalties, AirdropMint, ICont
         _setupContractURI(_uri);
     }
 
-    /// @dev Lets a contract admin set the URI for contract-level metadata.
-    function _setupContractURI(string memory _uri) internal {
-        string memory prevURI = contractURI;
-        contractURI = _uri;
-
-        emit ContractURIUpdated(prevURI, _uri);
+    function setBaseURI(string memory _baseUri) external {
+        _requireCallerIsContractOwner();
+        _setBaseURI(_baseUri);
     }
 
     function setDefaultRoyalty(address receiver, uint96 feeNumerator) public {
@@ -143,4 +145,59 @@ contract PaperSappy is OwnableBasic, ERC721C, BasicRoyalties, AirdropMint, ICont
         _requireCallerIsContractOwner();
         _setTokenRoyalty(tokenId, receiver, feeNumerator);
     }
+
+    function burn(uint256 tokenId) external {
+        _burn(tokenId);
+        // Overflow not possible, as _burnCounter cannot be exceed _currentIndex times.
+        unchecked {
+            _burnCounter++;
+        }
+    }
+
+    /**
+     * @dev Returns the total number of tokens in existence.
+     * Burned tokens will reduce the count.
+     */
+    function totalSupply() external view returns (uint256) {
+        unchecked {
+            return mintedSupply() - _burnCounter;
+        }
+    }
+
+    function _mintToken(address to, uint256 tokenId) internal virtual override {
+        _safeMint(to, tokenId);
+    }
+
+    /**
+     * @dev Base URI for computing {tokenURI}. If set, the resulting URI for each
+     * token will be the concatenation of the `baseURI` and the `tokenId`. Empty
+     * by default, can be overridden in child contracts.
+     */
+    function _baseURI() internal view virtual override returns (string memory) {
+        return _metadataURI;
+    }
+
+    function _setBaseURI(string memory _baseUri) internal virtual {
+        _metadataURI = _baseUri;
+    }
+
+    /// @dev Lets a contract admin set the URI for contract-level metadata.
+    function _setupContractURI(string memory _uri) internal {
+        string memory prevURI = _contractURI;
+        _contractURI = _uri;
+
+        emit ContractURIUpdated(prevURI, _uri);
+    }
 }
+
+//                         _____                                                _____ 
+//                        ( ___ )                                              ( ___ )
+//                         |   |~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|   | 
+//                         |   |   _____                  _____          _   _  |   | 
+//                         |   |  |__  /   __ _   _ __   |__  /   __ _  (_)_(_) |   | 
+//                         |   |    / /   / _` | | '_ \    / /   / _` |   | |   |   | 
+//                         |   |   / /_  | (_| | | | | |  / /_  | (_| |   | |   |   | 
+//                         |   |  /____|  \__,_| |_| |_| /____|  \__,_|   |_|   |   | 
+//                         |   |                                                |   | 
+//                         |___|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|___| 
+//                        (_____)                                              (_____)

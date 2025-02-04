@@ -18,7 +18,7 @@ abstract contract AirdropMintBase is MaxSupplyBase {
     error AirdropMint__MaxAirdropSupplyExceeded();
 
     /// @dev The current amount of tokens mintable via airdrop.
-    uint256 private _remainingAirdropSupply;
+    uint256 internal _remainingAirdropSupply;
 
     /// @notice Owner bulk mint to airdrop.
     /// Throws if length of `to` array is zero.
